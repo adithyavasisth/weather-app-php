@@ -23,9 +23,6 @@ CREATE TABLE IF NOT EXISTS hourly_weather (
     FOREIGN KEY (location_id) REFERENCES weather_locations(id) ON DELETE CASCADE
 );
 
--- Create an index on the date_time column for faster querying
-CREATE INDEX idx_date_time ON hourly_weather(date_time);
-
 -- Create the daily_weather table
 CREATE TABLE IF NOT EXISTS daily_weather (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -37,6 +34,3 @@ CREATE TABLE IF NOT EXISTS daily_weather (
     wind_speed_10m_max FLOAT,
     FOREIGN KEY (location_id) REFERENCES weather_locations(id) ON DELETE CASCADE
 );
-
--- Create an index on the date column for faster querying
-CREATE INDEX idx_date ON daily_weather(date);

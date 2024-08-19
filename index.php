@@ -1,5 +1,8 @@
 <?php
 require_once 'config.php';
+require_once 'fetch_weather.php';
+
+fetchWeatherData();
 $conn = getDBConnection();
 
 // Set the timezone to GMT+2

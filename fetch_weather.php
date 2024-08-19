@@ -2,8 +2,6 @@
 
 require_once "config.php";
 
-$conn = getDbConnection();
-
 // Fetch weather data from the Open Meteo API
 function getWeatherData($latitude, $longitude)
 {
@@ -77,29 +75,32 @@ function storeWeatherData($conn, $locationId, $weatherData)
     }
 }
 
-$latitude = LATITUDE;
-$longitude = LONGITUDE;
-$locationName = LOCATION_NAME;
-// Location information
-$locationQuery = $conn->prepare("SELECT id FROM weather_locations WHERE location_name = ?");
-$locationQuery->bind_param("s", $locationName);
-$locationQuery->execute();
-$locationQuery->store_result();
+function fetchWeatherData()
+{
+    $conn = getDbConnection();
 
-if ($locationQuery->num_rows > 0) {
-    $locationQuery->bind_result($locationId);
-    $locationQuery->fetch();
-} else {
-    $locationInsert = $conn->prepare("INSERT INTO weather_locations (latitude, longitude, location_name) VALUES (?, ?, ?)");
-    $locationInsert->bind_param("dds", $latitude, $longitude, $locationName);
-    $locationInsert->execute();
-    $locationId = $locationInsert->insert_id;
+    $latitude = LATITUDE;
+    $longitude = LONGITUDE;
+    $locationName = LOCATION_NAME;
+    // Location information
+    $locationQuery = $conn->prepare("SELECT id FROM weather_locations WHERE location_name = ?");
+    $locationQuery->bind_param("s", $locationName);
+    $locationQuery->execute();
+    $locationQuery->store_result();
+
+    if ($locationQuery->num_rows > 0) {
+        $locationQuery->bind_result($locationId);
+        $locationQuery->fetch();
+    } else {
+        $locationInsert = $conn->prepare("INSERT INTO weather_locations (latitude, longitude, location_name) VALUES (?, ?, ?)");
+        $locationInsert->bind_param("dds", $latitude, $longitude, $locationName);
+        $locationInsert->execute();
+        $locationId = $locationInsert->insert_id;
+    }
+
+    $weatherData = getWeatherData($latitude, $longitude);
+    storeWeatherData($conn, $locationId, $weatherData);
+
+    $conn->close();
 }
-
-$weatherData = getWeatherData($latitude, $longitude);
-storeWeatherData($conn, $locationId, $weatherData);
-
-$conn->close();
-
-echo "Weather data fetched and stored successfully!";
 ?>

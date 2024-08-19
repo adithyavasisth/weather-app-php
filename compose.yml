@@ -1,0 +1,40 @@
+services:
+  nginx:
+    image: nginx
+    ports:
+      - 8888:80
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www/html
+    depends_on:
+      - php
+
+  database:
+    build:
+      dockerfile: docker/mysql/Dockerfile
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: weatherdb
+    volumes:
+      - database_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  php:
+    build:
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - .:/var/www/html
+    # command: ["php", "/var/www/html/fetch_weather.php"]
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  database_data:
+    driver: local
